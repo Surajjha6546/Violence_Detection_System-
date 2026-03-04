@@ -1,7 +1,7 @@
 import sys
 import os
 
-# Ensure project root is in Python path (important for Render deployment)
+# Ensure project root is accessible
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from fastapi import FastAPI, UploadFile, File, Form
@@ -49,15 +49,15 @@ app.add_middleware(
 init_db()
 
 # --------------------------------------------------
-# LOAD AI MODEL
+# LOAD MODEL SAFELY
 # --------------------------------------------------
-MODEL_PATH = os.getenv("MODEL_PATH", "final_model.pt")
 THRESHOLD = 0.5
 
 try:
-    model, device = load_model(MODEL_PATH)
+    model, device = load_model()
+    print("Model loaded successfully")
 except Exception as e:
-    print("Model failed to load:", e)
+    print("Model loading failed:", e)
     model = None
     device = "cpu"
 
@@ -131,15 +131,8 @@ def analytics():
 
     if not rows:
         return {
-            "violence_distribution": {
-                "violent": 0,
-                "non_violent": 0
-            },
-            "severity_distribution": {
-                "LOW": 0,
-                "MEDIUM": 0,
-                "HIGH": 0
-            },
+            "violence_distribution": {"violent": 0, "non_violent": 0},
+            "severity_distribution": {"LOW": 0, "MEDIUM": 0, "HIGH": 0},
             "incidents_over_time": {}
         }
 
