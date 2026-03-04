@@ -2,9 +2,8 @@ fastapi
 uvicorn
 numpy
 opencv-python-headless
-pydantic
+torch
 python-multipart
 jinja2
 requests
-torch
-torchvision
+streamlit
