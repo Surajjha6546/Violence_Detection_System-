@@ -29,3 +29,4 @@ def load_model(model_path=None):
     device = "cpu"
 
     return model, device
+
