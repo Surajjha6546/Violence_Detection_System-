@@ -1,15 +1,31 @@
+import os
 import torch
-import torchvision
+import requests
 
-def load_model(model_path, device=None):
-    if device is None:
-        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+MODEL_URL = "https://drive.google.com/file/d/1PnuPX74RrKRLnPvSex-YKr0h-aq2niPk/view?usp=drive_link"
+MODEL_PATH = "final_model.pt"
 
-    model = torchvision.models.video.r3d_18(weights=None)
-    model.fc = torch.nn.Linear(model.fc.in_features, 1)
 
-    model.load_state_dict(torch.load(model_path, map_location=device))
-    model.to(device)
+def download_model():
+    if not os.path.exists(MODEL_PATH):
+        print("Downloading model...")
+
+        response = requests.get(MODEL_URL, stream=True)
+        with open(MODEL_PATH, "wb") as f:
+            for chunk in response.iter_content(chunk_size=8192):
+                if chunk:
+                    f.write(chunk)
+
+        print("Model downloaded successfully.")
+
+
+def load_model(model_path=None):
+
+    download_model()
+
+    model = torch.load(MODEL_PATH, map_location="cpu")
     model.eval()
+
+    device = "cpu"
 
     return model, device
