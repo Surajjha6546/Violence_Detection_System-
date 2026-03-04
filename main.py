@@ -1,7 +1,7 @@
 import sys
 import os
 
-# Ensure project root is in Python path (fixes ModuleNotFoundError on Render)
+# Ensure project root is in Python path (important for Render deployment)
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from fastapi import FastAPI, UploadFile, File, Form
@@ -51,15 +51,20 @@ init_db()
 # --------------------------------------------------
 # LOAD AI MODEL
 # --------------------------------------------------
-MODEL_PATH = "backend/models/final_model.pt"
+MODEL_PATH = os.getenv("MODEL_PATH", "final_model.pt")
 THRESHOLD = 0.5
 
-model, device = load_model(MODEL_PATH)
+try:
+    model, device = load_model(MODEL_PATH)
+except Exception as e:
+    print("Model failed to load:", e)
+    model = None
+    device = "cpu"
 
 # --------------------------------------------------
 # EVIDENCE STORAGE
 # --------------------------------------------------
-EVIDENCE_DIR = "backend/data/evidence"
+EVIDENCE_DIR = "evidence"
 os.makedirs(EVIDENCE_DIR, exist_ok=True)
 
 
@@ -160,7 +165,7 @@ def analytics():
 
 
 # --------------------------------------------------
-# ANALYZE VIDEO (UPLOAD OR URL)
+# ANALYZE VIDEO
 # --------------------------------------------------
 @app.post("/analyze")
 def analyze(
@@ -168,19 +173,20 @@ def analyze(
     video_url: str = Form(None)
 ):
 
+    if model is None:
+        return {"error": "Model not loaded"}
+
     temp_video_path = None
     source = "upload" if video else video_url
 
     try:
 
         if video:
-
             with tempfile.NamedTemporaryFile(delete=False, suffix=".mp4") as tmp:
                 shutil.copyfileobj(video.file, tmp)
                 temp_video_path = tmp.name
 
         elif video_url:
-
             temp_video_path = download_video_from_url(video_url)
 
         else:
@@ -254,6 +260,9 @@ def analyze(
 # --------------------------------------------------
 @app.get("/camera-detection")
 def camera_detection():
+
+    if model is None:
+        return {"error": "Model not loaded"}
 
     run_camera_detection(
         model=model,
