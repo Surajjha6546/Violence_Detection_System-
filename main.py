@@ -1,8 +1,13 @@
+import sys
+import os
+
+# Ensure project root is in Python path (fixes ModuleNotFoundError on Render)
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
 from fastapi import FastAPI, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
 import tempfile
 import shutil
-import os
 import numpy as np
 import cv2
 from datetime import datetime
@@ -168,7 +173,6 @@ def analyze(
 
     try:
 
-        # ---------------- INPUT ----------------
         if video:
 
             with tempfile.NamedTemporaryFile(delete=False, suffix=".mp4") as tmp:
@@ -182,7 +186,6 @@ def analyze(
         else:
             return {"error": "No video or URL provided"}
 
-        # ---------------- AI MODEL ----------------
         ai_result = predict_video_core(
             video_path=temp_video_path,
             model=model,
@@ -193,7 +196,6 @@ def analyze(
         ai_score = ai_result["confidence"]
         is_violent = ai_result["is_violent"]
 
-        # ---------------- FRAME ANALYSIS ----------------
         frames = extract_frames(
             temp_video_path,
             max_frames=40,
@@ -205,7 +207,6 @@ def analyze(
 
         motion = compute_motion_score(frames)
 
-        # ---------------- SEVERITY ----------------
         if motion < 0.25:
             severity = "LOW"
         elif motion < 0.55:
@@ -215,7 +216,6 @@ def analyze(
 
         evidence = save_evidence_frame(frames)
 
-        # ---------------- RESULT ----------------
         result = {
             "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
             "motion_score": round(float(motion), 3),
@@ -226,7 +226,6 @@ def analyze(
             "evidence_frame": evidence
         }
 
-        # ---------------- DATABASE ----------------
         log_incident(
             source=source,
             is_violent=1 if is_violent else 0,
@@ -234,7 +233,6 @@ def analyze(
             confidence=result["confidence"]
         )
 
-        # ---------------- EMAIL ALERT ----------------
         if is_violent:
             trigger_email_if_needed(result, source)
 
