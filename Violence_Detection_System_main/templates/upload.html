@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Violence Detection</title>
+</head>
+<body style="font-family: Arial; padding: 40px">
+
+<h2>AI-Powered Violence Detection</h2>
+
+<h3>Upload Video File</h3>
+<form method="POST" enctype="multipart/form-data">
+    <input type="file" name="video" accept="video/*">
+    <br><br>
+    <button type="submit" name="mode" value="file">Analyze Uploaded Video</button>
+</form>
+
+<hr>
+
+<h3>Analyze Video from URL</h3>
+<form method="POST">
+    <input type="text" name="video_url" placeholder="https://example.com/video.mp4" size="50">
+    <br><br>
+    <button type="submit" name="mode" value="url">Analyze URL Video</button>
+</form>
+
+</body>
+</html>

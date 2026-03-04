@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Violence Detection Dashboard</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f8;
+            padding: 30px;
+        }
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            max-width: 800px;
+            margin: auto;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .status-violent {
+            color: #b00020;
+            font-size: 30px;
+            font-weight: bold;
+        }
+        .status-safe {
+            color: #2e7d32;
+            font-size: 30px;
+            font-weight: bold;
+        }
+        .badge {
+            display: inline-block;
+            padding: 6px 14px;
+            border-radius: 6px;
+            color: white;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+        .high { background: #d32f2f; }
+        .medium { background: #f57c00; }
+        .none { background: #388e3c; }
+
+        .metric {
+            margin: 8px 0;
+            font-size: 15px;
+        }
+
+        ul {
+            margin-left: 20px;
+        }
+
+        .explanation {
+            margin-top: 15px;
+            background: #eef2f5;
+            padding: 12px;
+            border-radius: 6px;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+
+<div class="card">
+
+    {% if video_file %}
+    <video width="100%" controls style="margin-bottom:20px;">
+        <source src="{{ url_for('static', filename='uploads/' + video_file) }}">
+        Your browser does not support video playback.
+    </video>
+    {% endif %}
+
+    {% if result.is_violent %}
+        <div class="status-violent">🚨 Violence Detected</div>
+    {% else %}
+        <div class="status-safe">✅ No Violence Detected</div>
+    {% endif %}
+
+    <div class="badge {{ result.severity|lower }}">
+        Severity: {{ result.severity }}
+    </div>
+
+    <hr>
+
+    <h3>Analysis Summary</h3>
+
+    <div class="metric">🔹 Motion Score: <b>{{ result.motion_score }}</b></div>
+    <div class="metric">🔹 Interaction Score: <b>{{ result.interaction_score }}</b></div>
+    <div class="metric">🔹 AI Aggression Score: <b>{{ result.aggression_score }}</b></div>
+
+    {% if result.top_actions %}
+    <h4>AI Action Context</h4>
+    <ul>
+        {% for action, conf in result.top_actions %}
+            <li>{{ action }} — {{ conf }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+
+    <div class="explanation">
+        {{ result.explanation }}
+    </div>
+
+</div>
+
+</body>
+</html>

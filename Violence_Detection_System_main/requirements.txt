@@ -1,0 +1,13 @@
+fastapi
+uvicorn
+torch
+torchvision
+opencv-python-headless
+numpy
+pydantic
+python-multipart
+requests
+yt-dlp
+streamlit
+pandas
+scikit-learn
